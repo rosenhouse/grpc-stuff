@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package policy;
+
+// Interface consumed by policy-enforcers
+service InternalAPI {
+  // WatchPolicies provides a snapshot followed by an event stream
+  rpc WatchPolicies(PoliciesFilter) returns (stream PoliciesUpdate) {}
+}
+
+// PoliciesFilter defines a set of apps to filter against
+message PoliciesFilter {
+  repeated App app = 1;
+}
+
+// PoliciesUpdate describes a change to apply to a set of policies
+message PoliciesUpdate {
+  enum Method {
+    REPLACE = 0;
+    UNION = 1;
+  }
+
+  // How to apply this update to the existing state
+  Method method = 1;
+
+  // The other corner of the rectangle.
+  repeated Policy policy = 2;
+}
+
+// A policy to enforce
+message Policy {
+  App source = 1;
+  App destination = 2;
+  string protocol = 3;
+  string port_range = 4;
+}
+
+message App {
+  string id = 1;
+}
